@@ -32,8 +32,6 @@ public class Task implements Serializable {
 
     private String status;
 
-    private Integer count;
-
     @Transient
     private String description;
 
@@ -106,23 +104,12 @@ public class Task implements Serializable {
         this.createTime = createTime;
     }
 
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
     public String getDescription() {
         if (endTime == null) {
-            return type + "一次完整上下架";
-        }
-        if (count == null) {
-            long diff = endTime.getTime() - startTime.getTime();
-            return type + diff / 60000 + "分钟";
+            return type + "1次完整上下架";
         } else {
-            return type + count + "次";
+            long diff = endTime.getTime() - startTime.getTime();
+            return type + diff / 60000 + "分钟循环上下架";
         }
     }
 

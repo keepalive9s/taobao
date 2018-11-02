@@ -84,28 +84,8 @@ public class TaskController {
         User user = userService.getUserByNick((String) session.getAttribute("nick"));
         Task task = new Task();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //判断时间段是否合理
         Date startTime = dateFormat.parse(start);
         Date endTime = dateFormat.parse(end);
-        if (startTime.after(endTime)) {
-            attributes.addFlashAttribute("info", new PageInfo("error", "创建任务开始时间不能晚于结束时间"));
-            return "redirect:/task";
-        }
-        //判断时间段是否重叠
-        List<Task> tasks = taskService.getTasksByUser(user);
-        for (Task item : tasks) {
-            Date startTime1 = item.getStartTime();
-            Date endTime1 = item.getEndTime();
-            if (startTime1.before(endTime) && endTime1.after(startTime)) {
-                attributes.addFlashAttribute("info", new PageInfo("error", "与已有任务时间段重叠"));
-                return "redirect:/task";
-            }
-        }
-        //判断是否越期
-        if (endTime.after(user.getEndTime())) {
-            attributes.addFlashAttribute("info", new PageInfo("error", "创建任务结束时间不能晚于账户到期时间，请及时充值"));
-            return "redirect:/task";
-        }
         task.setType(type);
         task.setStartTime(startTime);
         task.setEndTime(endTime);

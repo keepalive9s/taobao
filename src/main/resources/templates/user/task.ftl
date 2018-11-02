@@ -19,7 +19,7 @@
 </head>
 <body>
 <nav class="navbar bg-dark navbar-expand-md navbar-dark">
-    <a class="navbar-brand" href="/taoshelf/success">有梦循环上下架</a>
+    <a class="navbar-brand" href="/taoshelf/home">有梦循环上下架</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -87,7 +87,7 @@
                 <td>${task_index+1}</td>
                 <td>${task.description!}</td>
                 <td>${task.num!}</td>
-                <td>${task.startTime?string('yyyy-MM-dd HH:mm:ss')}</td>
+                <td>${task.startTime!}</td>
                 <td>${task.endTime!}</td>
                 <td>${task.status!}</td>
                 <td>

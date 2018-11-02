@@ -51,6 +51,17 @@ public class PublicTest {
 
     @Test
     public void tes4() {
-        ArrayDeque deque = new ArrayDeque();
+        ArrayDeque<Integer> deque = new ArrayDeque<>();
+        for (int i = 0; i < 10; i++) {
+            deque.push(i);
+        }
+        while (!deque.isEmpty()) {
+            Integer pop = deque.pop();
+            if (pop == 5) {
+                deque.add(58);
+            } else {
+                System.out.println(pop);
+            }
+        }
     }
 }

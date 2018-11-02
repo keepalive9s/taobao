@@ -11,6 +11,8 @@ import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -19,6 +21,8 @@ import javax.annotation.Resource;
 import java.util.*;
 
 public class Job1 extends QuartzJobBean {
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @Resource
     private TaskService taskService;
@@ -40,17 +44,19 @@ public class Job1 extends QuartzJobBean {
 
     private long totalNum;
 
-    private ArrayDeque<Good> goodQueue1 = new ArrayDeque<>();
+    private List<Good> goodList1 = new ArrayList<>();
 
-    private ArrayDeque<Good> goodQueue2 = new ArrayDeque<>();
+    private List<Good> goodList2 = new ArrayList<>();
 
-    private List<Good> failList1 = new ArrayList<>();
+    private Map<Long, String> originalStatus1 = new HashMap<>();
 
-    private List<Good> failList2 = new ArrayList<>();
+    private Map<Long, String> originalStatus2 = new HashMap<>();
 
     private int busyCount1;
 
     private int busyCount2;
+
+    private boolean end;
 
     private boolean finish1 = false;
 
@@ -65,11 +71,12 @@ public class Job1 extends QuartzJobBean {
         redisTemplate.opsForValue().set(taskId, "0");
         task = taskService.getTaskById(taskId);
         user = task.getUser();
-        startTask();
+        initTask();
     }
 
-    //开始任务
-    private void startTask() {
+    //初始化任务
+    private void initTask() {
+        end = false;
         logService.log(user, task.getDescription() + "任务进度", "任务开始");
         readTotalNum(task.getType());
         logService.log(user, task.getDescription() + "任务进度", "任务总数" + totalNum + "件");
@@ -84,15 +91,17 @@ public class Job1 extends QuartzJobBean {
             public void run() {
                 try {
                     logService.log(user, task.getDescription() + "任务进度", "子任务2开始执行");
-                    readGoodList(goodQueue2, s2, task.getType(), 2);
-                    executeGoodList(goodQueue2, 2);
-                    recoveryGoodList(failList2, 2);
+                    readGoodList(goodList2, s2, task.getType(), 2);
+                    while (!end) {
+                        executeGoodList(goodList2, 2);
+                    }
+                    recoveryGoodList(goodList2, 2);
                     logService.log(user, task.getDescription() + "任务进度", "子任务2执行完毕");
                     finish2 = true;
                 } catch (Exception e) {
                     e.printStackTrace();
                     logService.log(user, task.getDescription() + "任务进度", "子任务2异常中止");
-                    recoveryGoodList(failList2, 2);
+                    recoveryGoodList(goodList2, 2);
                     finish2 = true;
                 }
                 if (finish1) {
@@ -105,15 +114,17 @@ public class Job1 extends QuartzJobBean {
         }).start();
         try {
             logService.log(user, task.getDescription() + "任务进度", "子任务1开始执行");
-            readGoodList(goodQueue1, s1, task.getType(), 1);
-            executeGoodList(goodQueue1, 1);
-            recoveryGoodList(failList1, 1);
+            readGoodList(goodList1, s1, task.getType(), 1);
+            while (!end) {
+                executeGoodList(goodList1, 1);
+            }
+            recoveryGoodList(goodList1, 1);
             logService.log(user, task.getDescription() + "任务进度", "子任务1执行完毕");
             finish1 = true;
         } catch (Exception e) {
             e.printStackTrace();
             logService.log(user, task.getDescription() + "任务进度", "子任务1异常中止");
-            recoveryGoodList(failList1, 1);
+            recoveryGoodList(goodList2, 1);
             finish1 = true;
         }
         if (finish2) {
@@ -127,13 +138,13 @@ public class Job1 extends QuartzJobBean {
     //读总数(单线程)
     private void readTotalNum(String type) {
         switch (type) {
-            case "库存商品上下架": {
-                Result<Good> result = goodService.getGoodsInstock(user, null, 5L, 1L, 1);
+            case "仓库商品": {
+                Result<Good> result = goodService.getGoodsInstock(user, null, 5L, 1L, 2);
                 totalNum = result.getTotal();
                 break;
             }
-            case "在售商品上下架": {
-                Result<Good> result = goodService.getGoodsOnsale(user, null, 5L, 1L, 1);
+            case "在售商品": {
+                Result<Good> result = goodService.getGoodsOnsale(user, null, 5L, 1L, 2);
                 totalNum = result.getTotal();
                 break;
             }
@@ -141,54 +152,54 @@ public class Job1 extends QuartzJobBean {
     }
 
     //读列表(双线程)
-    private void readGoodList(ArrayDeque<Good> goodQueue, String page, String type, int flag) {
+    private void readGoodList(List<Good> goodList, String page, String type, int flag) {
         String[] split = page.split("-");
         long start = Long.parseLong(split[0]);
         long end = Long.parseLong(split[1]);
         switch (type) {
-            case "库存商品上下架": {
+            case "仓库商品": {
                 for (long i = start; i <= end; i++) {
                     Result<Good> result = goodService.getGoodsInstock(user, null, 200L, i, flag);
-                    goodQueue.addAll(result.getItems());
+                    goodList.addAll(result.getItems());
                 }
                 break;
             }
-            case "在售商品上下架": {
+            case "在售商品": {
                 for (long i = start; i <= end; i++) {
                     Result<Good> result = goodService.getGoodsOnsale(user, null, 200L, i, flag);
-                    goodQueue.addAll(result.getItems());
+                    goodList.addAll(result.getItems());
                 }
                 break;
             }
         }
-        logService.log(user, task.getDescription() + "任务进度", "子任务" + flag + "分配" + goodQueue.size() + "件");
+        if (flag == 1) {
+            for (Good good : goodList) {
+                originalStatus1.put(good.getNumIid(), good.getApproveStatus());
+            }
+        } else if (flag == 2) {
+            for (Good good : goodList) {
+                originalStatus2.put(good.getNumIid(), good.getApproveStatus());
+            }
+        }
+        logService.log(user, task.getDescription() + "任务进度", "子任务" + flag + "分配" + goodList.size() + "件");
         task.setStatus("正在执行任务");
         taskService.saveTask(task);
         task = taskService.getTaskById(taskId);
     }
 
     //处理商品列表
-    private void executeGoodList(ArrayDeque<Good> goodQueue, int flag) {
-        Iterator<Good> iterator = goodQueue.iterator();
-        while (iterator.hasNext()) {
-            Good good = goodQueue.pop();
+    private void executeGoodList(List<Good> goodList, int flag) {
+        for (Good good : goodList) {
             task = taskService.findTaskById(taskId);
-            if (task.getEndTime() != null && task.getEndTime().before(new Date())) {
+            if (task.getEndTime().before(new Date())) {
+                end = true;
                 break;
             }
-            task = taskService.findTaskById(taskId);
             if (executeGood(good, flag)) {
                 if (executeGood(good, flag)) {
-                    //成功
                     redisTemplate.opsForValue().increment(taskId, 1);
-                    System.out.println(user.getNick() + ":" + flag + " " + "[SUCCESS]" + good.getTitle());
-                } else {
-                    //失败则加入再处理队
-                    fail(flag, good);
+                    logger.info(user.getNick() + "----" + flag);
                 }
-            } else {
-                //失败则补到队尾
-                goodQueue.add(good);
             }
         }
     }
@@ -202,7 +213,6 @@ public class Job1 extends QuartzJobBean {
                 return true;
             } else {
                 busy(flag);
-                return false;
             }
         } else if (good.getApproveStatus().equals("instock")) {
             if (goodService.doGoodListing(user, good, flag)) {
@@ -210,7 +220,6 @@ public class Job1 extends QuartzJobBean {
                 return true;
             } else {
                 busy(flag);
-                return false;
             }
         }
         return false;
@@ -218,20 +227,34 @@ public class Job1 extends QuartzJobBean {
 
     //恢复商品列表
     private void recoveryGoodList(List<Good> goodList, int flag) {
-        logService.log(user, task.getDescription() + "任务进度", "开始恢复子任务" + flag + "(" + goodList.size() + "件)");
+        logService.log(user, task.getDescription() + "任务进度", "开始恢复子任务" + flag);
+        Map<Long, String> originalStatus;
+        if (flag == 1) {
+            originalStatus = this.originalStatus1;
+        } else {
+            originalStatus = this.originalStatus2;
+        }
         for (Good good : goodList) {
-            int count = 0;
-            while (count < 2) {
-                if (executeGood(good, flag)) {
+            String origin = originalStatus.get(good.getNumIid());
+            if (!origin.equals(good.getApproveStatus())) {
+                int count = 0;
+                while (count < 2 && !origin.equals(good.getApproveStatus())) {
+                    if (executeGood(good, flag)) {
+                        redisTemplate.opsForValue().increment(taskId, flag);
+                        logService.log(user, "恢复商品原状态成功", good.getTitle());
+                        break;
+                    } else {
+                        logService.log(user, "恢复商品原状态失败", good.getTitle());
+                        count++;
+                    }
+                }
+                if (origin.equals(good.getApproveStatus())) {
                     logService.log(user, "恢复商品原状态成功", good.getTitle());
-                    break;
                 } else {
                     logService.log(user, "恢复商品原状态失败", good.getTitle());
-                    count++;
                 }
             }
         }
-        logService.log(user, task.getDescription() + "任务进度", "恢复子任务" + flag + "(" + goodList.size() + "件)完成");
     }
 
     private void notBusy(int flag) {
@@ -275,14 +298,6 @@ public class Job1 extends QuartzJobBean {
             Thread.sleep(sleepTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void fail(int flag, Good good) {
-        if (flag == 1) {
-            failList1.add(good);
-        } else {
-            failList2.add(good);
         }
     }
 }

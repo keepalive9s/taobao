@@ -51,7 +51,7 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
     com.youmeng.taoshelf: DEBUG
-  path: /root/logs/taoshelf
+  path: /root/logs
 
 server:
   port: 80

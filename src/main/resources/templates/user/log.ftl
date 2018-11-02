@@ -18,7 +18,7 @@
 </head>
 <body>
 <nav class="navbar bg-dark navbar-expand-md navbar-dark">
-    <a class="navbar-brand" href="/taoshelf/success">有梦循环上下架</a>
+    <a class="navbar-brand" href="/taoshelf/home">有梦循环上下架</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>

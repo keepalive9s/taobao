@@ -19,7 +19,7 @@
 </head>
 <body>
 <nav class="navbar bg-dark navbar-expand-md navbar-dark">
-    <a class="navbar-brand" href="/taoshelf/success">有梦循环上下架</a>
+    <a class="navbar-brand" href="/taoshelf/home">有梦循环上下架</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -72,7 +72,7 @@
             <div class="col-12">
                 <div class="alert alert-success alert-dismissable">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <strong>成功!</strong> 指定操作成功提示信息。
+                    <strong>循环上下架</strong>在开始时间和结束时间段内进行循环上下架，一旦结束时间到则结束任务，任务时间不能与其他任务的时间段重叠
                 </div>
             </div>
         </div>
@@ -80,8 +80,8 @@
             <h5 class="col-12">1、选择要处理的商品：</h5>
             <label class="col-6">
                 <select class="form-control" name="type" required>
-                    <option value="在售商品上下架">在售商品</option>
-                    <option value="库存商品上下架">仓库商品</option>
+                    <option value="在售商品">在售商品</option>
+                    <option value="仓库商品">仓库商品</option>
                 </select>
             </label>
         </div>
@@ -96,7 +96,7 @@
             <label class="col-6">结束时间
                 <el-date-picker v-model="value2" type="datetime" placeholder="选择日期时间" :value-format='p'>
                 </el-date-picker>
-                <input type="text" name="end" class="form-control" v-model:value="value2" hidden>
+                <input type="text" name="end" class="form-control" required v-model:value="value2" hidden>
             </label>
         </div>
     </form>

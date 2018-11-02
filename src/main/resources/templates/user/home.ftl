@@ -16,7 +16,7 @@
 </head>
 <body>
 <nav class="navbar bg-dark navbar-expand-md navbar-dark">
-    <a class="navbar-brand" href="/taoshelf/success">有梦循环上下架</a>
+    <a class="navbar-brand" href="/taoshelf/home">有梦循环上下架</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -69,6 +69,12 @@
             </form>
         </div>
         <div class="col-lg-4 col-md-3 col-sm-1"></div>
+    </div>
+    <div>
+        <p>请注意应用授权使用到期时间，一旦到期将影响任务正常进行，请及时到服务市场续费</p>
+        <p>服务使用到期时间：${user.endTime!}&nbsp;<a href="">充值</a></p>
+        <p>应用1使用到期时间：${user.endDate1!}&nbsp;<a href="https://tb.cn/VdsUTMw" target="_blank">续费</a></p>
+        <p>应用2使用到期时间：${user.endDate2!}&nbsp;<a href="https://tb.cn/QKThZNw" target="_blank">续费</a></p>
     </div>
 </div>
 </body>

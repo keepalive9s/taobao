@@ -2,9 +2,8 @@ package com.youmeng.taoshelf.service;
 
 import com.youmeng.taoshelf.entity.Task;
 import com.youmeng.taoshelf.entity.User;
-import com.youmeng.taoshelf.quartz.Job1;
 import com.youmeng.taoshelf.quartz.Job2;
-import com.youmeng.taoshelf.quartz.ShelfCircleJob1;
+import com.youmeng.taoshelf.quartz.Job1;
 import com.youmeng.taoshelf.repository.TaskRepository;
 import org.quartz.*;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,27 +32,26 @@ public class TaskService {
     private TaskRepository taskRepository;
 
     public boolean addTask(Task task) {
-        taskRepository.save(task);
+        //TODO
         User user = task.getUser();
         try {
+            taskRepository.save(task);
             String name = task.getId();
             String group = user.getNick();
             JobDetail jobDetail;
             if (task.getEndTime() != null) {
                 jobDetail = JobBuilder
-                        .newJob(Job2.class)
+                        .newJob(Job1.class)
                         .withIdentity(name, group)
                         .usingJobData("task_id", task.getId())
                         .build();
             } else {
                 jobDetail = JobBuilder
-                        .newJob(Job1.class)
+                        .newJob(Job2.class)
                         .withIdentity(name, group)
                         .usingJobData("task_id", task.getId())
                         .build();
             }
-
-
             Trigger trigger = TriggerBuilder
                     .newTrigger()
                     .withIdentity(name, group)

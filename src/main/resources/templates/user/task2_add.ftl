@@ -19,7 +19,7 @@
 </head>
 <body>
 <nav class="navbar bg-dark navbar-expand-md navbar-dark">
-    <a class="navbar-brand" href="/taoshelf/success">有梦循环上下架</a>
+    <a class="navbar-brand" href="/taoshelf/home">有梦循环上下架</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -80,8 +80,8 @@
             <h5 class="col-12">1、选择要处理的商品：</h5>
             <label class="col-6">
                 <select class="form-control" name="type" required>
-                    <option value="在售商品上下架">在售商品</option>
-                    <option value="库存商品上下架">仓库商品</option>
+                    <option value="在售商品">在售商品</option>
+                    <option value="仓库商品">仓库商品</option>
                 </select>
             </label>
         </div>
