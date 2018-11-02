@@ -53,7 +53,7 @@
         <div class="col-md-8">
             <#if info?exists>
                 <#if info.type="success">
-            <div class="alert alert-info alert-dismissable">
+            <div class="alert alert-success alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <strong>提示!</strong> ${info.message}
             </div>
@@ -75,8 +75,6 @@
                 <input type="submit" class="form-control btn btn-primary" value="激活充值卡">
             </form>
             <br>
-            <a href="" target="_blank">充值卡密购买地址</a><br>
-
         </div>
         <div class="col-md-2"></div>
     </div>

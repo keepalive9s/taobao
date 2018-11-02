@@ -184,7 +184,7 @@ public class Job2 extends QuartzJobBean {
                 if (executeGood(good, flag)) {
                     //成功
                     redisTemplate.opsForValue().increment(taskId, 1);
-                    logger.info(user.getNick() + "----" + flag);
+                    logger.info(user.getNick() + ":" + flag);
                 } else {
                     //失败则加入再处理队
                     fail(flag, good);
@@ -231,7 +231,9 @@ public class Job2 extends QuartzJobBean {
                     count++;
                 }
             }
-            logService.log(user, "恢复商品原状态失败", good.getTitle());
+            if (count == 2) {
+                logService.log(user, "恢复商品原状态失败", good.getTitle());
+            }
         }
         logService.log(user, task.getDescription() + "任务进度", "恢复子任务" + flag + "(" + goodList.size() + "件)完成");
     }

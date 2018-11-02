@@ -72,7 +72,7 @@
             <div class="col-12">
                 <div class="alert alert-success alert-dismissable">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <strong>循环上下架</strong>在开始时间和结束时间段内进行循环上下架，一旦结束时间到则结束任务，任务时间不能与其他任务的时间段重叠
+                    <strong>循环上下架：</strong>在开始时间和结束时间段内进行循环上下架，一旦结束时间到则结束任务，任务时间不能与其他任务的时间段重叠
                 </div>
             </div>
         </div>

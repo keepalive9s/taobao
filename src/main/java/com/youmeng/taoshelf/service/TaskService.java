@@ -1,5 +1,6 @@
 package com.youmeng.taoshelf.service;
 
+import com.youmeng.taoshelf.entity.PageInfo;
 import com.youmeng.taoshelf.entity.Task;
 import com.youmeng.taoshelf.entity.User;
 import com.youmeng.taoshelf.quartz.Job2;
@@ -31,8 +32,33 @@ public class TaskService {
     @Resource
     private TaskRepository taskRepository;
 
-    public boolean addTask(Task task) {
-        //TODO
+    public PageInfo addTask(Task task) {
+        if (task.getEndTime() != null) {
+            if (task.getStartTime().after(task.getEndTime())) {
+                return new PageInfo("error", "创建任务失败，任务开始时间不能晚于结束时间");
+            }
+            if (task.getEndTime().after(task.getUser().getEndTime())) {
+                return new PageInfo("error", "创建任务失败，任务结束时间不能晚于账户到期时间，请及时充值");
+            }
+            List<Task> tasks = getTasksByUser(task.getUser());
+            for (Task item : tasks) {
+                Date startTime1 = item.getStartTime();
+                Date endTime1 = item.getEndTime();
+                if (item.getDescription().contains("完整上下架")) {
+                    return new PageInfo("error", "创建任务失败，有完整上下架任务还未完成");
+                }
+                if (startTime1.before(task.getEndTime()) && endTime1.after(task.getStartTime())) {
+                    return new PageInfo("error", "创建任务失败，不得与已有任务时间段重叠");
+                }
+            }
+        } else {
+            List<Task> tasks = getTasksByUser(task.getUser());
+            for (Task item : tasks) {
+                if (item.getStatus().contains("正在执行") || item.getStatus().contains("等待执行")) {
+                    return new PageInfo("error", "创建任务失败，完整上下架任务时不得有其他正在执行或等待执行的任务");
+                }
+            }
+        }
         User user = task.getUser();
         try {
             taskRepository.save(task);
@@ -57,34 +83,34 @@ public class TaskService {
                     .withIdentity(name, group)
                     .startAt(task.getStartTime())
                     .build();
-
             scheduler.scheduleJob(jobDetail, trigger);
             task.setStatus("等待执行");
             taskRepository.save(task);
-            return true;
+            return new PageInfo("success", "创建任务成功");
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return false;
+            return new PageInfo("error", "创建任务失败");
         }
     }
 
-    public boolean removeTaskById(User user, String id) {
+    public PageInfo removeTaskById(User user, String id) {
         Task task = taskRepository.findTaskById(id);
         if (task == null) {
-            System.out.println("null");
-            return false;
+            return new PageInfo("error", "删除任务失败，非法操作");
         } else if (!task.getUser().getNick().equals(user.getNick())) {
-            return false;
+            return new PageInfo("error", "删除任务失败，非法操作");
+        } else if (task.getStatus().contains("正在执行")) {
+            return new PageInfo("error", "删除任务失败，任务正在进行请先中止");
         }
         try {
             taskRepository.delete(task);
             scheduler.deleteJob(JobKey.jobKey(task.getUser().getNick(), id));
-            return true;
+            return new PageInfo("success", "删除任务成功");
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return false;
+            return new PageInfo("error", "删除任务失败");
         }
     }
 
@@ -94,7 +120,7 @@ public class TaskService {
         return taskRepository.findTasksByUser(user, pageable);
     }
 
-    public List<Task> getTasksByUser(User user) {
+    private List<Task> getTasksByUser(User user) {
         return taskRepository.findTasksByUser(user);
     }
 

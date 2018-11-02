@@ -72,7 +72,7 @@
     </div>
     <div>
         <p>请注意应用授权使用到期时间，一旦到期将影响任务正常进行，请及时到服务市场续费</p>
-        <p>服务使用到期时间：${user.endTime!}&nbsp;<a href="">充值</a></p>
+        <p>服务使用到期时间：${user.endTime!}&nbsp;</p>
         <p>应用1使用到期时间：${user.endDate1!}&nbsp;<a href="https://tb.cn/VdsUTMw" target="_blank">续费</a></p>
         <p>应用2使用到期时间：${user.endDate2!}&nbsp;<a href="https://tb.cn/QKThZNw" target="_blank">续费</a></p>
     </div>

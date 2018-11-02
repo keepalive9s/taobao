@@ -8,7 +8,6 @@ import com.youmeng.taoshelf.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +48,11 @@ public class TaskController {
         for (Task task : tasks) {
             if (task.getStatus().equals("正在执行任务")) {
                 String count = redisTemplate.opsForValue().get(task.getId());
-                task.setStatus(task.getStatus() + count + "次");
+                if (task.getEndTime() == null) {
+                    task.setStatus(task.getStatus() + count + "/" + task.getNum());
+                } else {
+                    task.setStatus(task.getStatus() + "(第" + count + "次上下架)");
+                }
             }
         }
         modelAndView.addObject("tasks", tasks);
@@ -90,13 +93,8 @@ public class TaskController {
         task.setStartTime(startTime);
         task.setEndTime(endTime);
         task.setUser(user);
-        if (taskService.addTask(task)) {
-            attributes.addFlashAttribute("info", new PageInfo("success", "创建任务成功"));
-            return "redirect:/task";
-        } else {
-            attributes.addFlashAttribute("info", new PageInfo("error", "创建任务失败"));
-            return "redirect:/task";
-        }
+        attributes.addFlashAttribute("info", taskService.addTask(task));
+        return "redirect:/task";
     }
 
     @PostMapping("/add_task2")
@@ -110,25 +108,15 @@ public class TaskController {
         task.setType(type);
         task.setStartTime(startTime);
         task.setUser(user);
-        if (taskService.addTask(task)) {
-            attributes.addFlashAttribute("info", new PageInfo("success", "创建任务成功"));
-            return "redirect:/task";
-        } else {
-            attributes.addFlashAttribute("info", new PageInfo("error", "创建任务失败"));
-            return "redirect:/task";
-        }
+        attributes.addFlashAttribute("info", taskService.addTask(task));
+        return "redirect:/task";
     }
 
     @GetMapping("/remove_task")
     public String removeTask(HttpSession session, RedirectAttributes attributes, @RequestParam String id) {
         User user = userService.getUserByNick((String) session.getAttribute("nick"));
-        if (taskService.removeTaskById(user, id)) {
-            attributes.addFlashAttribute("info", new PageInfo("success", "删除任务成功"));
-            return "redirect:/task";
-        } else {
-            attributes.addFlashAttribute("info", new PageInfo("error", "删除任务失败"));
-            return "redirect:/task";
-        }
+        attributes.addFlashAttribute("info", taskService.removeTaskById(user, id));
+        return "redirect:/task";
     }
 
     @RequestMapping("/stop_task")

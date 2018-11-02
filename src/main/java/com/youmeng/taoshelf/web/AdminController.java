@@ -66,7 +66,11 @@ public class AdminController {
         for (Task task : tasks) {
             if (task.getStatus().equals("正在执行任务")) {
                 String count = redisTemplate.opsForValue().get(task.getId());
-                task.setStatus(task.getStatus() + count + "次");
+                if (task.getEndTime() == null) {
+                    task.setStatus(task.getStatus() + count + "/" + task.getNum());
+                } else {
+                    task.setStatus(task.getStatus() + "(第" + count + "次上下架)");
+                }
             }
         }
         modelAndView.addObject("tasks", tasks);

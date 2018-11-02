@@ -19,6 +19,7 @@ public class UserInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+//        request.getSession().setAttribute("nick", "yang");
         String[] s = new String[]{
                 "/taoshelf/submit_card_key",
                 "/taoshelf/recharge",

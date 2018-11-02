@@ -198,7 +198,7 @@ public class Job1 extends QuartzJobBean {
             if (executeGood(good, flag)) {
                 if (executeGood(good, flag)) {
                     redisTemplate.opsForValue().increment(taskId, 1);
-                    logger.info(user.getNick() + "----" + flag);
+                    logger.info(user.getNick() + ":" + flag);
                 }
             }
         }

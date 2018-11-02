@@ -57,7 +57,7 @@
     </div>
     <#if info?exists>
         <#if info.type="success">
-            <div class="alert alert-info alert-dismissable">
+            <div class="alert alert-success alert-dismissable">
                 <button type="button" class="close" data-dismiss="alert">&times;</button>
                 <strong>提示!</strong> ${info.message}
             </div>
