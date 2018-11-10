@@ -38,7 +38,7 @@ public class UserInterceptor implements HandlerInterceptor {
             String contextPath = request.getContextPath();
             String nick = (String) request.getSession().getAttribute("nick");
             if (nick == null) {
-                response.sendRedirect("https://oauth.taobao.com/authorize?response_type=token&client_id=12322527&redirect_uri=http://ruyisoft.com/redirect/smart_zhanggui.php");
+                response.sendRedirect("https://oauth.taobao.com/authorize?response_type=token&client_id=12322527&redirect_uri=http://ruyisoft.com/redirect/smart_zhanggui.php&state=youmeng");
                 return false;
             } else {
                 User user = userService.getUserByNick(nick);

@@ -263,17 +263,13 @@ public class Job2 extends QuartzJobBean {
             count = busyCount2;
         }
         if (count == 0) {
-            sleepTime = 200;
+            sleepTime = 400;
         } else if (count == 1) {
-            sleepTime = 1200;
+            sleepTime = 2500;
         } else if (count == 2) {
-            sleepTime = 1600;
-        } else if (count == 3) {
-            sleepTime = 2100;
-        } else if (count == 4) {
-            sleepTime = 3000;
+            sleepTime = 4000;
         } else {
-            sleepTime = 3500;
+            sleepTime = 6000;
         }
         try {
             Thread.sleep(sleepTime);

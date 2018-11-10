@@ -37,8 +37,8 @@ public class UserController {
     //回调接收地址
     @RequestMapping("/pick_up")
     public String pickUp(HttpSession session,
-                         @RequestParam String nick,
-                         @RequestParam(name = "session") String token,
+                         @RequestParam(defaultValue = "") String nick,
+                         @RequestParam(defaultValue = "", name = "session") String token,
                          @RequestParam String appkey) throws ApiException {
         //检验参数
         Pattern pattern1 = Pattern.compile("^(?!_)(?!.*?_$)[a-zA-Z0-9_\\u4e00-\\u9fa5]+$");
@@ -48,6 +48,15 @@ public class UserController {
         Pattern pattern2 = Pattern.compile(".*[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？\\\\]+.*");
         if (pattern2.matcher(token).matches()) {
             return "redirect:/error";
+        }
+        if (appkey.equals("12322527")) {
+            if (nick.equals("") || token.equals("")) {
+                return "redirect:https://tb.cn/VdsUTMw";
+            }
+        } else if (appkey.equals("12402170")) {
+            if (nick.equals("") || token.equals("")) {
+                return "redirect:https://tb.cn/QKThZNw";
+            }
         }
         User user = userService.getUserByNick(nick);
         if (user == null) {
